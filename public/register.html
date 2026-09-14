@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Create Akun - fbvidio</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<div class="page">
+  <div class="header-center" style="margin-top:40px;">
+    <div class="logo-big">📘 fbvidio</div>
+    <div class="tagline">Shortlink mudah, cepat, praktis</div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;">Buat <span style="color:#4db8ff;">Akun</span></h2>
+    <p style="color:var(--muted); margin-top:-8px; font-size:14px;">Daftar biar bisa kelola link kamu sendiri</p>
+
+    <div id="error" class="error" style="display:none"></div>
+    <div id="success" class="success" style="display:none"></div>
+
+    <input id="username" type="text" placeholder="Username (3-20 karakter)" autocomplete="username" />
+    <input id="password" type="password" placeholder="Password (min. 6 karakter)" autocomplete="new-password" />
+    <input id="password2" type="password" placeholder="Ulangi Password" autocomplete="new-password" />
+
+    <button class="primary" id="registerBtn">👤 Create Akun</button>
+
+    <div class="divider"><span class="line"></span> atau <span class="line"></span></div>
+
+    <a class="secondary" href="/login.html">➡️ Sudah punya akun? Login</a>
+  </div>
+</div>
+
+<script>
+  document.getElementById('registerBtn').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const password2 = document.getElementById('password2').value;
+    const errorBox = document.getElementById('error');
+    const successBox = document.getElementById('success');
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+
+    if (!username || !password) {
+      errorBox.textContent = 'Isi semua kolom dulu ya.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    if (password !== password2) {
+      errorBox.textContent = 'Password dan ulangi password tidak sama.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Gagal membuat akun.';
+        errorBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '👤 Create Akun';
+        return;
+      }
+
+      successBox.textContent = 'Akun berhasil dibuat! Mengarahkan ke halaman login...';
+      successBox.style.display = 'block';
+      setTimeout(() => { location.href = '/login.html'; }, 1500);
+    } catch (e) {
+      errorBox.textContent = 'Ada masalah koneksi, coba lagi.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '👤 Create Akun';
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Edit Link - fbvidio</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="brand">📘 fbvidio</div>
+  <div class="nav-right">
+    <span id="authArea"></span>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </div>
+</header>
+<nav class="dropdown-menu" id="dropdownMenu">
+  <a href="/">🏠 Home</a>
+  <a href="/links.html">🔗 Link</a>
+  <a href="/#support">🎧 Support</a>
+</nav>
+
+<div class="page">
+  <div class="header-center">
+    <div class="logo-big">✏️</div>
+    <div style="font-size:22px; font-weight:800; margin-top:8px;">Edit Link</div>
+    <div class="tagline">Ubah link pendek sesuai kebutuhan Anda.</div>
+  </div>
+
+  <div class="card">
+    <div id="error" class="error" style="display:none"></div>
+
+    <div class="field-label"><span class="icon">🔗</span> Link Panjang</div>
+    <input id="url" type="url" placeholder="https://..." />
+
+    <div class="field-label"><span class="icon">✏️</span> Edit Backhalf (Opsional)</div>
+    <input id="slug" type="text" placeholder="contoh: vidio-keren" />
+
+    <button class="primary" id="saveBtn">💾 Simpan Perubahan</button>
+  </div>
+</div>
+
+<script src="/navbar.js"></script>
+<script>
+  requireLogin();
+
+  const params = new URLSearchParams(location.search);
+  const originalSlug = params.get('slug');
+  const errorBox = document.getElementById('error');
+
+  if (!originalSlug) {
+    location.href = '/links.html';
+  }
+
+  async function loadLink() {
+    try {
+      const res = await fetch('/api/links/' + encodeURIComponent(originalSlug));
+      const data = await res.json();
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Link tidak ditemukan.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      document.getElementById('url').value = data.url;
+      document.getElementById('slug').value = data.slug;
+    } catch (e) {
+      errorBox.textContent = 'Ada masalah koneksi.';
+      errorBox.style.display = 'block';
+    }
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const url = document.getElementById('url').value.trim();
+    const slug = document.getElementById('slug').value.trim();
+    errorBox.style.display = 'none';
+
+    if (!url || !/^https?:\/\//i.test(url)) {
+      errorBox.textContent = 'URL tidak valid, harus diawali http:// atau https://';
+      errorBox.style.display = 'block';
+      return;
+    }
+    if (!/^[a-zA-Z0-9_-]{1,32}$/.test(slug)) {
+      errorBox.textContent = 'Backhalf hanya boleh huruf, angka, - dan _';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+      const res = await fetch('/api/links/' + encodeURIComponent(originalSlug), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, slug }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Gagal menyimpan perubahan.';
+        errorBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Perubahan';
+        return;
+      }
+
+      location.href = '/links.html';
+    } catch (e) {
+      errorBox.textContent = 'Ada masalah koneksi, coba lagi.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '💾 Simpan Perubahan';
+    }
+  });
+
+  loadLink();
+</script>
+
+</body>
+</html>

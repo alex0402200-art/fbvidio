@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login - fbvidio</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<div class="page">
+  <div class="header-center" style="margin-top:40px;">
+    <div class="logo-big">📘 fbvidio</div>
+    <div class="tagline">Shortlink mudah, cepat, praktis</div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;">Selamat <span style="color:#4db8ff;">Datang</span></h2>
+    <p style="color:var(--muted); margin-top:-8px; font-size:14px;">Login untuk melanjutkan ke akun Anda</p>
+
+    <div id="error" class="error" style="display:none"></div>
+
+    <input id="username" type="text" placeholder="Username" autocomplete="username" />
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+    <button class="primary" id="loginBtn">➡️ Login</button>
+
+    <div class="divider"><span class="line"></span> atau <span class="line"></span></div>
+
+    <a class="secondary" href="/register.html">👤 Create Akun</a>
+
+    <div class="note" style="text-align:center; margin-top:16px;">🔒 Akses akun Anda dengan aman</div>
+  </div>
+
+  <div class="feature-list">
+    <div class="lock-title">🔒 Login sekarang mudah dan cepat</div>
+    <ul>
+      <li>Bisa edit backhalf</li>
+      <li>Bisa hapus backhalf</li>
+      <li>Mengetahui link yang sudah dibuat</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorBox = document.getElementById('error');
+    errorBox.style.display = 'none';
+
+    if (!username || !password) {
+      errorBox.textContent = 'Isi username dan password dulu ya.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Login gagal.';
+        errorBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '➡️ Login';
+        return;
+      }
+
+      location.href = '/links.html';
+    } catch (e) {
+      errorBox.textContent = 'Ada masalah koneksi, coba lagi.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '➡️ Login';
+    }
+  });
+</script>
+
+</body>
+</html>

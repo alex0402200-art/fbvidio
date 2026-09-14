@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Link Saya - fbvidio</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="brand">📘 fbvidio</div>
+  <div class="nav-right">
+    <span id="authArea"></span>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </div>
+</header>
+<nav class="dropdown-menu" id="dropdownMenu">
+  <a href="/">🏠 Home</a>
+  <a href="/links.html">🔗 Link</a>
+  <a href="/#support">🎧 Support</a>
+</nav>
+
+<div class="page">
+  <div class="header-center">
+    <div class="logo-big">🔗</div>
+    <div style="font-size:22px; font-weight:800; margin-top:8px;">Links</div>
+    <div class="tagline">Kelola semua link pendek yang sudah Anda buat.</div>
+  </div>
+
+  <div id="loading" class="note" style="text-align:center;">Memuat...</div>
+  <div id="empty" class="note" style="text-align:center; display:none;">Belum ada link. Yuk bikin di halaman Home.</div>
+  <div id="listContainer"></div>
+
+  <div class="footer">Created by <span class="brand-name">kotoko</span></div>
+</div>
+
+<script src="/navbar.js"></script>
+<script>
+  requireLogin();
+
+  async function loadLinks() {
+    const loading = document.getElementById('loading');
+    const empty = document.getElementById('empty');
+    const container = document.getElementById('listContainer');
+
+    try {
+      const res = await fetch('/api/links');
+      const data = await res.json();
+      loading.style.display = 'none';
+
+      if (!res.ok) {
+        if (res.status === 401) { location.href = '/login.html'; return; }
+        empty.textContent = data.error || 'Gagal memuat link.';
+        empty.style.display = 'block';
+        return;
+      }
+
+      if (!data.links || data.links.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      container.innerHTML = data.links.map(function (link) {
+        const shortUrl = location.origin + '/' + link.slug;
+        return (
+          '<div class="link-item">' +
+            '<div class="top-row">' +
+              '<div class="short-url">' + shortUrl + '</div>' +
+            '</div>' +
+            '<div class="views">👁 ' + link.views + ' klik</div>' +
+            '<div class="long-url">' + link.url + '</div>' +
+            '<div class="actions">' +
+              '<a href="/edit.html?slug=' + encodeURIComponent(link.slug) + '">✏️ Edit</a>' +
+              '<button class="delete-btn" data-slug="' + link.slug + '">🗑️ Hapus</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      container.querySelectorAll('.delete-btn').forEach(function (btn) {
+        btn.addEventListener('click', async () => {
+          const slug = btn.getAttribute('data-slug');
+          if (!confirm('Yakin mau hapus link "' + slug + '"?')) return;
+          const res = await fetch('/api/links/' + encodeURIComponent(slug), { method: 'DELETE' });
+          if (res.ok) {
+            loadLinks();
+          } else {
+            alert('Gagal menghapus link.');
+          }
+        });
+      });
+    } catch (e) {
+      loading.style.display = 'none';
+      empty.textContent = 'Ada masalah koneksi.';
+      empty.style.display = 'block';
+    }
+  }
+
+  loadLinks();
+</script>
+
+</body>
+</html>
