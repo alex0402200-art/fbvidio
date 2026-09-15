@@ -12,6 +12,8 @@
     "/links",
     "/edit.html",
     "/edit",
+    "/admin.html",
+    "/admin",
     "/style.css",
     "/navbar.js",
     "/favicon.ico"
