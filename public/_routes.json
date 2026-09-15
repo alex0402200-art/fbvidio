@@ -5,9 +5,13 @@
     "/",
     "/index.html",
     "/login.html",
+    "/login",
     "/register.html",
+    "/register",
     "/links.html",
+    "/links",
     "/edit.html",
+    "/edit",
     "/style.css",
     "/navbar.js",
     "/favicon.ico"
