@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin - fbvidio</title>
+<link rel="stylesheet" href="/style.css" />
+<style>
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--blue);
+  }
+  .stat-box .label {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="brand"><span class="logo-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 6.5L17 3C18.5 1.5 21 1.5 22.5 3C24 4.5 24 7 22.5 8.5L19 12M10.5 17.5L7 21C5.5 22.5 3 22.5 1.5 21C0 19.5 0 17 1.5 15.5L5 12M8 16L16 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></span> fbvidio</div>
+  <div class="nav-right">
+    <span id="authArea"></span>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </div>
+</header>
+<nav class="dropdown-menu" id="dropdownMenu">
+  <a href="/">🏠 Home</a>
+  <a href="/links.html">🔗 Link</a>
+  <a href="https://sociabuzz.com/bangudin0402/tribe" target="_blank" rel="noopener">🎧 Support</a>
+</nav>
+
+<div class="page">
+  <div class="header-center">
+    <div style="font-size:22px; font-weight:800;">🛠️ Admin Dashboard</div>
+    <div class="tagline">Statistik pengguna fbvidio</div>
+  </div>
+
+  <div id="loading" class="note" style="text-align:center;">Memuat...</div>
+  <div id="denied" class="error" style="display:none; text-align:center;"></div>
+
+  <div id="content" style="display:none;">
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="num" id="totalUsers">0</div>
+        <div class="label">👤 Total User</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="totalLinks">0</div>
+        <div class="label">🔗 Total Link</div>
+      </div>
+      <div class="stat-box" style="grid-column: span 2;">
+        <div class="num" id="totalClicks">0</div>
+        <div class="label">👁 Total Klik Semua Link</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:12px;">Daftar User</div>
+      <table>
+        <thead>
+          <tr><th>Username</th><th>Daftar</th><th>Link</th></tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">Created by <span class="brand-name">kotoko</span></div>
+</div>
+
+<script src="/navbar.js"></script>
+<script>
+  async function loadAdminStats() {
+    const loading = document.getElementById('loading');
+    const denied = document.getElementById('denied');
+    const content = document.getElementById('content');
+
+    try {
+      const res = await fetch('/api/admin-stats');
+      const data = await res.json();
+      loading.style.display = 'none';
+
+      if (!res.ok) {
+        if (res.status === 401) { location.href = '/login.html'; return; }
+        denied.textContent = res.status === 403
+          ? '🚫 Halaman ini cuma buat admin.'
+          : (data.error || 'Gagal memuat data.');
+        denied.style.display = 'block';
+        return;
+      }
+
+      content.style.display = 'block';
+      document.getElementById('totalUsers').textContent = data.total_users;
+      document.getElementById('totalLinks').textContent = data.total_links;
+      document.getElementById('totalClicks').textContent = data.total_clicks;
+
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = data.users.map(function (u) {
+        const date = new Date(u.created_at).toLocaleDateString('id-ID');
+        return '<tr><td>' + u.username + '</td><td>' + date + '</td><td>' + u.link_count + '</td></tr>';
+      }).join('');
+    } catch (e) {
+      loading.style.display = 'none';
+      denied.textContent = 'Ada masalah koneksi.';
+      denied.style.display = 'block';
+    }
+  }
+
+  loadAdminStats();
+</script>
+
+</body>
+</html>
