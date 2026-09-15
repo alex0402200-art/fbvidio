@@ -39,6 +39,28 @@ a { color: inherit; }
   background-clip: text;
   color: transparent;
 }
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logo-icon svg { width: 16px; height: 16px; }
+.logo-icon-big {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.logo-icon-big svg { width: 32px; height: 32px; }
 .nav-right {
   display: flex;
   align-items: center;
@@ -345,3 +367,4 @@ button.secondary, a.secondary {
 }
 .footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 24px; }
 .footer .brand-name { color: var(--green); font-weight: 700; }
+  
