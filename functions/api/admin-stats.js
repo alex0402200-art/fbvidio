@@ -47,9 +47,11 @@ export async function onRequestGet(context) {
     "SELECT COALESCE(SUM(views), 0) AS c FROM links"
   ).first();
 
+  // Per user: jumlah link + total klik (kolom views) dari semua link miliknya
   const { results: userList } = await env.DB.prepare(
     `SELECT u.id, u.username, u.created_at,
-            (SELECT COUNT(*) FROM links l WHERE l.user_id = u.id) AS link_count
+            (SELECT COUNT(*) FROM links l WHERE l.user_id = u.id) AS link_count,
+            (SELECT COALESCE(SUM(l.views), 0) FROM links l WHERE l.user_id = u.id) AS click_count
      FROM users u
      ORDER BY u.created_at DESC`
   ).all();
@@ -60,4 +62,4 @@ export async function onRequestGet(context) {
     total_clicks: totalClicks.c,
     users: userList,
   });
-}
+    }
