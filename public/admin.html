@@ -6,6 +6,7 @@
 <title>Admin - fbvidio</title>
 <link rel="stylesheet" href="/style.css" />
 <style>
+  /* ===== Kartu statistik ===== */
   .stat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -13,25 +14,108 @@
     margin-bottom: 16px;
   }
   .stat-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: var(--card-bg, #0f172a);
+    border: 1px solid var(--border, #1f2a44);
     border-radius: 14px;
-    padding: 16px;
-    text-align: center;
-  }
-  .stat-box .num {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--blue);
+    padding: 14px 16px;
   }
   .stat-box .label {
-    color: var(--muted);
+    color: var(--muted, #94a3b8);
     font-size: 13px;
-    margin-top: 4px;
   }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; }
+  .stat-box .num {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+  /* Kartu klik: satu-satunya yang diberi warna, biar jadi pusat perhatian */
+  .stat-box.wide {
+    grid-column: span 2;
+    background: linear-gradient(135deg, rgba(124,58,237,.18), rgba(37,99,235,.18));
+    border-color: rgba(99,102,241,.45);
+  }
+  .stat-box.wide .num {
+    font-size: 40px;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ===== Daftar user ===== */
+  .list-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .list-title { font-weight: 700; }
+  .sort-group { display: flex; gap: 6px; }
+  .sort-btn {
+    font: inherit;
+    font-size: 12px;
+    color: var(--muted, #94a3b8);
+    background: transparent;
+    border: 1px solid var(--border, #1f2a44);
+    border-radius: 999px;
+    padding: 5px 11px;
+    cursor: pointer;
+  }
+  .sort-btn.active {
+    color: #fff;
+    background: rgba(99,102,241,.25);
+    border-color: rgba(99,102,241,.6);
+  }
+  .sort-btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border, #1f2a44);
+  }
+  .user-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+  }
+  .user-main { flex: 1; min-width: 0; }
+  .user-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user-date { color: var(--muted, #94a3b8); font-size: 12px; margin-top: 1px; }
+  .bar {
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 2px;
+    background: var(--border, #1f2a44);
+    overflow: hidden;
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #2563eb);
+  }
+  .user-nums { display: flex; gap: 16px; text-align: right; flex: none; }
+  .user-nums b { display: block; font-size: 16px; }
+  .user-nums span { font-size: 11px; color: var(--muted, #94a3b8); }
+  .empty { color: var(--muted, #94a3b8); text-align: center; padding: 16px 0; }
 </style>
 </head>
 <body>
@@ -61,27 +145,28 @@
   <div id="content" style="display:none;">
     <div class="stat-grid">
       <div class="stat-box">
-        <div class="num" id="totalUsers">0</div>
         <div class="label">👤 Total User</div>
+        <div class="num" id="totalUsers">0</div>
       </div>
       <div class="stat-box">
-        <div class="num" id="totalLinks">0</div>
         <div class="label">🔗 Total Link</div>
+        <div class="num" id="totalLinks">0</div>
       </div>
-      <div class="stat-box" style="grid-column: span 2;">
-        <div class="num" id="totalClicks">0</div>
+      <div class="stat-box wide">
         <div class="label">👁 Total Klik Semua Link</div>
+        <div class="num" id="totalClicks">0</div>
       </div>
     </div>
 
     <div class="card">
-      <div style="font-weight:700; margin-bottom:12px;">Daftar User</div>
-      <table>
-        <thead>
-          <tr><th>Username</th><th>Daftar</th><th>Link</th></tr>
-        </thead>
-        <tbody id="userTableBody"></tbody>
-      </table>
+      <div class="list-head">
+        <div class="list-title">Daftar User</div>
+        <div class="sort-group">
+          <button class="sort-btn active" data-sort="new">Terbaru</button>
+          <button class="sort-btn" data-sort="clicks">Klik terbanyak</button>
+        </div>
+      </div>
+      <div id="userList"></div>
     </div>
   </div>
 
@@ -90,6 +175,62 @@
 
 <script src="/navbar.js"></script>
 <script>
+  var users = [];
+  var sortMode = 'new';
+
+  function fmt(n) { return Number(n || 0).toLocaleString('id-ID'); }
+
+  // Cegah karakter aneh di username merusak halaman
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function renderUsers() {
+    var list = document.getElementById('userList');
+    if (!users.length) {
+      list.innerHTML = '<div class="empty">Belum ada user.</div>';
+      return;
+    }
+
+    var sorted = users.slice();
+    if (sortMode === 'clicks') {
+      sorted.sort(function (a, b) { return (b.click_count || 0) - (a.click_count || 0); });
+    }
+
+    var maxClicks = Math.max.apply(null, users.map(function (u) { return u.click_count || 0; }));
+
+    list.innerHTML = sorted.map(function (u) {
+      var date = new Date(u.created_at).toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+      var pct = maxClicks > 0 ? Math.round(((u.click_count || 0) / maxClicks) * 100) : 0;
+      return '<div class="user-row">' +
+        '<div class="avatar">' + esc(u.username.charAt(0)) + '</div>' +
+        '<div class="user-main">' +
+          '<div class="user-name">' + esc(u.username) + '</div>' +
+          '<div class="user-date">Daftar ' + date + '</div>' +
+          '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+        '</div>' +
+        '<div class="user-nums">' +
+          '<div><b>' + fmt(u.link_count) + '</b><span>Link</span></div>' +
+          '<div><b>' + fmt(u.click_count) + '</b><span>Klik</span></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  document.querySelectorAll('.sort-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      sortMode = btn.dataset.sort;
+      document.querySelectorAll('.sort-btn').forEach(function (b) {
+        b.classList.toggle('active', b === btn);
+      });
+      renderUsers();
+    });
+  });
+
   async function loadAdminStats() {
     const loading = document.getElementById('loading');
     const denied = document.getElementById('denied');
@@ -110,15 +251,12 @@
       }
 
       content.style.display = 'block';
-      document.getElementById('totalUsers').textContent = data.total_users;
-      document.getElementById('totalLinks').textContent = data.total_links;
-      document.getElementById('totalClicks').textContent = data.total_clicks;
+      document.getElementById('totalUsers').textContent = fmt(data.total_users);
+      document.getElementById('totalLinks').textContent = fmt(data.total_links);
+      document.getElementById('totalClicks').textContent = fmt(data.total_clicks);
 
-      const tbody = document.getElementById('userTableBody');
-      tbody.innerHTML = data.users.map(function (u) {
-        const date = new Date(u.created_at).toLocaleDateString('id-ID');
-        return '<tr><td>' + u.username + '</td><td>' + date + '</td><td>' + u.link_count + '</td></tr>';
-      }).join('');
+      users = data.users || [];
+      renderUsers();
     } catch (e) {
       loading.style.display = 'none';
       denied.textContent = 'Ada masalah koneksi.';
